@@ -25,3 +25,7 @@ pytest-doctestplus = "^1.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F403"]
+"**/{tests,docs,tools}/*" = ["F403"]

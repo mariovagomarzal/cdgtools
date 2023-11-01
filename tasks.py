@@ -19,3 +19,14 @@ def tests(c, verbose=0, no_doctest=False):
         pytest_command += " --doctest-modules"
 
     c.run(pytest_command, pty=True)
+
+
+@task
+def lint(c, fix=False):
+    """Lint code."""
+    if fix:
+        ruff_command = "ruff check --fix ."
+    else:
+        ruff_command = "ruff check ."
+
+    c.run(ruff_command, pty=True)
