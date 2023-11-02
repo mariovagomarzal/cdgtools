@@ -1,4 +1,5 @@
 """Module with the parametrizations classes."""
+from __future__ import annotations
 from typing import Any, Union
 import re
 
@@ -373,6 +374,113 @@ class Parametrization:
                     return True
                 else:
                     return False
+
+    def __add__(self, other: Parametrization) -> Parametrization:
+        """
+        Add two parametrizations.
+
+        Add two parametrizations by adding their parametrization vectors.
+        Dimensions must be equal. If the parameters are different, the
+        parameter of the first parametrization is used. If the domains are
+        different, the most restrictive domain, i. e., the intersection of
+        both domains, is used.
+
+        Parameters
+        ----------
+        other : Parametrization
+            The parametrization to add.
+
+        Returns
+        -------
+        parametrization : Parametrization
+            The sum of the two parametrizations.
+
+        Raises
+        ------
+        ValueError
+            If the dimensions of the parametrizations are different.
+
+        Examples
+        --------
+        We can add two parametrizations with the same dimension, parameter
+        and domain by using the `+` operator.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle + circle
+        Parametrization(Matrix([[2*cos(t)], [2*sin(t)]]), t, Interval(0, 2*pi))
+
+        If the dimensions of the parametrizations are different, a
+        `ValueError` is raised.
+
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([t, t**2, t**3]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> circle + other
+        Traceback (most recent call last):
+        ...
+        ValueError: Dimension of both parametrizations must be equal, not 2 and 3.
+
+        If the parameters of the parametrizations are different, the
+        parameter of the first parametrization is used.
+
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=sp.symbols("s"),
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> sum_param = circle + other
+        >>> sum_param.parameter
+        t
+
+        If the domains of the parametrizations are different, the most
+        restrictive domain is used.
+
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, sp.pi),
+        ... )
+        >>> sum_param = circle + other
+        >>> sum_param.domain
+        Interval(0, pi)
+        """
+
+        if self.dimension != other.dimension:
+            raise ValueError(
+                f"Dimension of both parametrizations must be equal, not"
+                f" {self.dimension} and {other.dimension}."
+            )
+        else:
+            domain = self.domain
+            if self.domain != other.domain:
+                domain = self.domain.intersect(other.domain)
+
+            return Parametrization(
+                parametrization=self.parametrization + other.parametrization,
+                parameter=self.parameter,
+                domain=domain,
+            )
+
+    def __neg__(self) -> Parametrization:
+        """Additive inverse of the parametrization."""
+        return Parametrization(
+            parametrization=-self.parametrization,
+            parameter=self.parameter,
+            domain=self.domain,
+        )
+
+    def __sub__(self, other: Parametrization) -> Parametrization:
+        """Subtract two parametrizations."""
+        return self + (-other)
 
 
 
