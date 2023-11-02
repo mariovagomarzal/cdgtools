@@ -37,6 +37,22 @@ class Parametrization:
     domain : Interval
         The domain of the parameter.
 
+    Raises
+    ------
+    ValueError
+        If `parametrization` is not a column vector.
+
+    Attributes
+    ----------
+    parametrization : ImmutableMatrix
+        The parametrization of the space.
+    parameter : Symbol
+        The symbol used to represent the parameter.
+    domain : Interval
+        The domain of the parameter.
+    dimension : int
+        The dimension of the space.
+
     Examples
     --------
     >>> from cdgtools import Parametrization
@@ -72,7 +88,11 @@ class Parametrization:
         self.parametrization = sp.ImmutableMatrix(parametrization)
         self.parameter = parameter
         self.domain = domain
-        self.dimension = self.parametrization.shape[0]
+        self.dimension, cols = self.parametrization.shape
+        if cols != 1:
+            raise ValueError(
+                f"Parametrization must be a column vector, not {cols} columns."
+            )
 
     def __str__(self) -> str:
         return f"{self.parametrization}"
