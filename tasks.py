@@ -29,4 +29,7 @@ def lint(c, fix=False):
     else:
         ruff_command = "ruff check ."
 
-    c.run(ruff_command, pty=True)
+    print("Ruff linting...")
+    c.run(ruff_command, pty=True, warn=True)
+    print("Mypy linting...")
+    c.run("mypy cdgtools", pty=True)
