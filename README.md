@@ -20,6 +20,13 @@ Then, to activate the virtual environment, run:
 poetry shell
 ```
 
+We are using [pre-commit][pre-commit] to manage the git hooks. To
+install them, run:
+
+```bash
+pre-commit install
+```
+
 ### Testing and Linting
 
 We are using [Invoke][invoke] to manage the tasks. Testing is done with
@@ -57,6 +64,7 @@ Vago Marzal][mario] under the terms of the [MIT License](/LICENSE).
 
 
 [poetry]: https://python-poetry.org/
+[pre-commit]: https://pre-commit.com/
 [invoke]: https://www.pyinvoke.org/
 [pytest]: https://docs.pytest.org/en/stable/
 [doctestplus]: https://github.com/scientific-python/pytest-doctestplus
