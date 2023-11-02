@@ -16,8 +16,6 @@ class Parametrization:
     """
     Base class for parametrizations.
 
-    Explanation
-    -----------
     A parametrization is a function that maps an interval of the real numbers
     to a set of points in a space. For example, the parametrization of a
     circle of radius 1 in the plane is given by:
@@ -153,8 +151,6 @@ class Parametrization:
         """
         Get the `name`-th coordinate of the parametrization.
 
-        Explanation
-        -----------
         This method is used to get the `name`-th coordinate of the
         parametrization. For example, if we have a parametrization of a
         circle in the plane, we can get the `x` and `y` coordinates of the
