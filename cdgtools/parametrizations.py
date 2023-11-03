@@ -482,6 +482,47 @@ class Parametrization:
         """Subtract two parametrizations."""
         return self + (-other)
 
+    def diff(self, order: int = 1) -> sp.ImmutableMatrix:
+        """
+        Return the `order`-th derivative of the parametrization.
+
+        Parameters
+        ----------
+        order : int
+            Order of the derivative.
+
+        Returns
+        -------
+        diff : ImmutableMatrix
+            The `order`-th derivative of the parametrization.
+
+        Examples
+        --------
+        We can get the first derivative of a parametrization by using the
+        `diff` method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.diff()
+        Matrix([
+        [-sin(t)],
+        [ cos(t)]])
+
+        If we specify the order of the derivative, we can get the second
+        derivative.
+
+        >>> circle.diff(2)
+        Matrix([
+        [-cos(t)],
+        [-sin(t)]])
+        """
+        return self.parametrization.diff(self.parameter, order)
 
 
 class Parametrization2D(Parametrization):
