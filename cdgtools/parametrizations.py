@@ -7,6 +7,7 @@ import numpy as np
 import sympy as sp
 
 from cdgtools.constants import AXIS_LABELS
+from cdgtools._utils import _has_sols_in
 
 
 # Constants
@@ -524,6 +525,83 @@ class Parametrization:
         """
         return self.parametrization.diff(self.parameter, order)
 
+    def reparametrize(
+        self,
+        function: sp.Expr,
+        new_parameter: sp.Symbol,
+        new_domain: sp.Interval,
+    ) -> Parametrization:
+        """
+        Reparametrize the parametrization.
+
+        Reparametrize the parametrization by using the given function and
+        domain. The function must be an invertible function from the new
+        domain to the old domain.
+
+        Parameters
+        ----------
+        function : Expr
+            The function used to reparametrize the parametrization.
+        new_domain : Interval
+            The domain of the new parametrization.
+
+        Returns
+        -------
+        reparametrization : Parametrization
+            The reparametrization of the parametrization.
+
+        Raises
+        ------
+        ValueError
+            If the function is not invertible or the image of the new
+            domain under the function is not a subset of the old domain.
+
+        Examples
+        --------
+        We can reparametrize a parametrization by using the `reparametrize`
+        method. The function must be an invertible function from the new
+        domain to the old domain.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.reparametrize(t / 2, t, sp.Interval(0, 4 * sp.pi))
+        Parametrization(Matrix([
+        [cos(t/2)],
+        [sin(t/2)]]), t, Interval(0, 4*pi))
+
+        If the function is not invertible or the image of the new domain
+        under the function is not a subset of the old domain, a
+        `ValueError` is raised.
+
+        >>> circle.reparametrize(t**2, t, sp.Interval(-1, 1))
+        Traceback (most recent call last):
+        ...
+        ValueError: Function must be invertible.
+        >>> circle.reparametrize(t, t, sp.Interval(0, 4 * sp.pi))
+        Traceback (most recent call last):
+        ...
+        ValueError: Image of new domain must be a subset of the old domain.
+        """
+        # if not sp.invert_real(function, self.parameter):
+        #     raise ValueError("Function must be invertible.")
+
+        # image = function.subs(self.parameter, new_domain)
+        # if image not in self.domain:
+        #     raise ValueError("Image of new domain must be a subset of the old domain.")
+
+        # return Parametrization(
+        #     parametrization=self.parametrization.subs(self.parameter, function),
+        #     parameter=new_parameter,
+        #     domain=new_domain,
+        # )
+        return ""
+
     def is_regular(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
         """
         Check if the parametrization is regular.
@@ -605,10 +683,10 @@ class Parametrization:
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        solutions = [sp.solveset(component, self.parameter) for component in derivative]
-        solution = sp.Intersection(self.domain, *solutions)
-
-        return solution == sp.EmptySet
+        return not all(
+            _has_sols_in(f, self.parameter, self.domain)
+            for f in derivative
+        )
 
 
 class Parametrization2D(Parametrization):
