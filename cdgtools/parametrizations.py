@@ -5,7 +5,7 @@ import re
 
 import sympy as sp
 
-from cdgtools.constants import _AXIS_LABELS, _MATRIX_TYPES
+from cdgtools.constants import _AXIS_LABELS
 from cdgtools._utils import _has_sols_in
 
 
@@ -25,7 +25,7 @@ class Parametrization:
 
     Parameters
     ----------
-    parametrization : ImmutableMatrix (or any other matrix type)
+    parametrization : Any
         The parametrization of the space.
     parameter : Symbol
         The symbol used to represent the parameter.
@@ -39,7 +39,7 @@ class Parametrization:
 
     Attributes
     ----------
-    parametrization : ImmutableMatrix
+    parametrization : Any
         The parametrization of the space.
     parameter : Symbol
         The symbol used to represent the parameter.
@@ -74,14 +74,14 @@ class Parametrization:
     Parametrization2D : Class for 2D parametrizations.
     Parametrization3D : Class for 3D parametrizations.
     """
-    parametrization: sp.ImmutableMatrix
+    parametrization: Any
     parameter: sp.Symbol
     domain: sp.Interval
     dimension: int
 
     def __init__(
         self,
-        parametrization: _MATRIX_TYPES,
+        parametrization: Any,
         parameter: sp.Symbol,
         domain: sp.Interval = sp.Reals,
     ) -> None:
@@ -478,7 +478,7 @@ class Parametrization:
         """Subtract two parametrizations."""
         return self + (-other)
 
-    def diff(self, order: int = 1) -> sp.ImmutableMatrix:
+    def diff(self, order: int = 1) -> Any:
         """
         Return the `order`-th derivative of the parametrization.
 
