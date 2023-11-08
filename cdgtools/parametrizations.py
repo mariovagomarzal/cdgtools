@@ -1,17 +1,12 @@
 """Module with the parametrizations classes."""
 from __future__ import annotations
-from typing import Any, Union
+from typing import Any
 import re
 
-import numpy as np
 import sympy as sp
 
-from cdgtools.constants import AXIS_LABELS
+from cdgtools.constants import _AXIS_LABELS, _MATRIX_TYPES
 from cdgtools._utils import _has_sols_in
-
-
-# Constants
-_MATRIX_TYPES = Union[sp.ImmutableMatrix, sp.Matrix, np.ndarray, list[Any]]
 
 
 class Parametrization:
@@ -286,8 +281,8 @@ class Parametrization:
         ...
         ValueError: Index must be less than 2, not 2.
         """
-        if name in AXIS_LABELS.keys():
-            index = AXIS_LABELS[name]
+        if name in _AXIS_LABELS.keys():
+            index = _AXIS_LABELS[name]
         else:
             # Chek if `name` matches some string of the form `[a-z]\d+`
             # (e.g. `x1`, `y2`, `z3`, etc.)
