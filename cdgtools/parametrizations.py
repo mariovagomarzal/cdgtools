@@ -524,6 +524,92 @@ class Parametrization:
         """
         return self.parametrization.diff(self.parameter, order)
 
+    def is_regular(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
+        """
+        Check if the parametrization is regular.
+
+        A parametrization is regular if its derivative is not the zero
+        vector in any point of its domain. For that, we calculate the
+        derivative of the parametrization and check that the equation
+        :math:`\\gamma'(t) = 0` has no solution in the domain of the
+        parametrization.
+
+        Since the expressions of the parametrization and its derivative
+        may contain other symbols, we have to specify numerical values for
+        those symbols. We do that by using the `subs` argument.
+
+        In some cases, we can't solve the equation :math:`\\gamma'(t) = 0`
+        analytically. In that case, a `NotImplementedError` is raised.
+
+        Parameters
+        ----------
+        subs : dict[Symbol, Any] or None
+            Substitutions to make before checking if the parametrization is
+            regular.
+
+        Returns
+        -------
+        regular : bool
+            Whether the parametrization is regular.
+
+        Raises
+        ------
+        ValueError
+            If the first derivative of the parametrization contains other
+            symbols and no substitutions are specified.
+        NotImplementedError
+            If the equation :math:`\\gamma'(t) = 0` can't be solved
+            analytically.
+
+        Examples
+        --------
+        We can check if a parametrization is regular by using the
+        `is_regular` method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.is_regular()
+        True
+
+        If our parametrization contains other symbols, we have to specify
+        numerical values for those symbols. We can check that depending on
+        the value of the parameter, the parametrization is regular or not.
+
+        >>> lamda = sp.symbols("lambda")
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([t**2, lamda * sp.exp(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> other.is_regular({lamda: 1})
+        True
+        >>> other.is_regular({lamda: 0})
+        False
+
+        If no substitutions are specified and the first derivative of the
+        parametrization contains other symbols, a `ValueError` is raised.
+
+        >>> other.is_regular()
+        Traceback (most recent call last):
+        ...
+        ValueError: Substitutions must be specified.
+        """
+        derivative = self.diff().subs(subs)
+        free_symbols = derivative.free_symbols - {self.parameter}
+        if free_symbols != set():
+            raise ValueError("Substitutions must be specified.")
+
+        solutions = [sp.solveset(component, self.parameter) for component in derivative]
+        solution = sp.Intersection(self.domain, *solutions)
+
+        return solution == sp.EmptySet
+
 
 class Parametrization2D(Parametrization):
     pass
