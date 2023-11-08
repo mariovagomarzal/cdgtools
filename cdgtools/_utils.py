@@ -1,7 +1,14 @@
 """Module containing utility functions."""
+from typing import Any
+
 import sympy as sp
 
 
-def _has_sols_in(f: sp.Expr, x: sp.Symbol, domain: sp.Set) -> bool:
+def _has_sols_in(
+    eq_matrix: Any,
+    symbol: sp.Symbol,
+    domain: sp.Set
+) -> bool:
     """Return True if f has solutions in domain, False otherwise."""
-    return sp.solveset(f, x, domain=domain).is_empty is False
+    solutions = [sp.solveset(eq, symbol, domain=domain) for eq in eq_matrix]
+    return sp.Intersection(*solutions).is_empty is False
