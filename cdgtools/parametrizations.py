@@ -22,11 +22,11 @@ class Parametrization:
     to a set of points in a space. For example, the parametrization of a
     circle of radius 1 in the plane is given by:
 
-    .. math::
-
+    \\[
         \\gamma(t) = (\\cos(t), \\sin(t)),
+    \\]
 
-    where :math:`t \\in [0, 2\\pi]`.
+    where $t \\in [0, 2\\pi]$.
 
     Parameters
     ----------
@@ -609,14 +609,14 @@ class Parametrization:
         A parametrization is regular if its derivative is not the zero
         vector in any point of its domain. For that, we calculate the
         derivative of the parametrization and check that the equation
-        :math:`\\gamma'(t) = 0` has no solution in the domain of the
+        $\\gamma'(t) = 0$ has no solution in the domain of the
         parametrization.
 
         Since the expressions of the parametrization and its derivative
         may contain other symbols, we have to specify numerical values for
         those symbols. We do that by using the `subs` argument.
 
-        In some cases, we can't solve the equation :math:`\\gamma'(t) = 0`
+        In some cases, we can't solve the equation $\\gamma'(t) = 0$
         analytically. In that case, a `NotImplementedError` is raised.
 
         Parameters

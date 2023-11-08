@@ -22,6 +22,9 @@ pre-commit = "^3.5.0"
 invoke = "^2.2.0"
 pytest-doctestplus = "^1.0.0"
 mypy = "^1.6.1"
+mkdocs-material = "^9.4.8"
+mkdocstrings = {extras = ["python"], version = "^0.23.0"}
+pytkdocs = {extras = ["numpy-style"], version = "^0.16.1"}
 
 [build-system]
 requires = ["poetry-core"]
