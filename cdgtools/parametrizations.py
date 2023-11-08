@@ -68,11 +68,6 @@ class Parametrization:
     Interval(0, 2*pi)
     >>> circle.dimension
     2
-
-    See Also
-    --------
-    Parametrization2D : Class for 2D parametrizations.
-    Parametrization3D : Class for 3D parametrizations.
     """
     parametrization: Any
     parameter: sp.Symbol
@@ -678,10 +673,7 @@ class Parametrization:
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        return not all(
-            _has_sols_in(f, self.parameter, self.domain)
-            for f in derivative
-        )
+        return not _has_sols_in(derivative, self.parameter, self.domain)
 
 
 class Parametrization2D(Parametrization):
