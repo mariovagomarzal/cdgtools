@@ -6,7 +6,12 @@ import re
 import sympy as sp
 
 from cdgtools.constants import _AXIS_LABELS
-from cdgtools._utils import _are_equal_exprs, _is_bounded, _has_sols_in
+from cdgtools._utils import (
+    _norm,
+    _are_equal_exprs,
+    _is_bounded,
+    _has_sols_in
+)
 
 
 class Parametrization:
@@ -96,7 +101,7 @@ class Parametrization:
         return f"{self.__class__.__name__}"\
                f"({self.parametrization}, {self.parameter}, {self.domain})"
 
-    def __call__(self, t: Any) -> sp.ImmutableMatrix:
+    def __call__(self, t: Any) -> Any:
         """
         Evaluate the parametrization at the point `t`.
 
@@ -107,7 +112,7 @@ class Parametrization:
 
         Returns
         -------
-        point : ImmutableMatrix
+        point : Any
             The point in the space corresponding to t.
 
         Raises
@@ -485,7 +490,7 @@ class Parametrization:
 
         Returns
         -------
-        diff : ImmutableMatrix
+        diff : Any
             The `order`-th derivative of the parametrization.
 
         Examples
@@ -515,6 +520,63 @@ class Parametrization:
         [-sin(t)]])
         """
         return self.parametrization.diff(self.parameter, order)
+
+    def segment(self, new_interval: sp.Interval) -> Parametrization:
+        """
+        Return a segment of the parametrization.
+
+        A segment of a parametrization is a parametrization defined in a
+        closed and bounded interval of the domain of the parametrization.
+
+        Parameters
+        ----------
+        new_interval : Interval
+            The interval in which to define the segment.
+
+        Returns
+        -------
+        segment : Parametrization
+            The segment of the parametrization.
+
+        Raises
+        ------
+        ValueError
+            If `new_interval` is not a closed and bounded interval.
+
+        Examples
+        --------
+        We can get a segment of a parametrization by using the `segment`
+        method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.segment(sp.Interval(0, sp.pi))
+        Parametrization(Matrix([[cos(t)], [sin(t)]]), t, Interval(0, pi))
+
+        If the interval is not closed and bounded, a `ValueError` is
+        raised.
+
+        >>> circle.segment(sp.Interval(0, sp.oo))
+        Traceback (most recent call last):
+        ...
+        ValueError: Interval must be closed and bounded, not Interval(0, oo).
+        """
+        if not (_is_bounded(new_interval) and new_interval.is_closed):
+            raise ValueError(
+                f"Interval must be closed and bounded, not {new_interval}."
+            )
+
+        return Parametrization(
+            parametrization=self.parametrization,
+            parameter=self.parameter,
+            domain=new_interval,
+        )
 
     def is_closed(self) -> bool:
         """
@@ -575,6 +637,101 @@ class Parametrization:
                 self(self.domain.sup),
                 zero=sp.zeros(self.dimension, 1),
             )
+
+    def velocity(self) -> Any:
+        """
+        Return the velocity vector of the parametrization.
+
+        The velocity of a parametrization is the derivative of the
+        parametrization with respect to the parameter.
+
+        Returns
+        -------
+        velocity : Any
+            The velocity of the parametrization.
+
+        Examples
+        --------
+        We can get the velocity of a parametrization by using the
+        `velocity` method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.velocity()
+        Matrix([
+        [-sin(t)],
+        [ cos(t)]])
+        """
+        return self.diff()
+
+    def speed(self) -> sp.Expr:
+        """
+        Return the speed of the parametrization.
+
+        The speed of a parametrization is the norm of its velocity.
+
+        Returns
+        -------
+        speed : Expr
+            The speed of the parametrization.
+
+        Examples
+        --------
+        We can get the speed of a parametrization by using the `speed`
+        method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.speed()
+        sqrt(sin(t)**2 + cos(t)**2)
+        >>> circle.speed().simplify()
+        1
+        """
+        return _norm(self.velocity())
+
+    def tangent(self) -> Any:
+        """
+        Return the tangent vector of the parametrization.
+
+        The tangent vector of a parametrization is the unit vector in the
+        direction of the velocity of the parametrization.
+
+        Returns
+        -------
+        tangent : Any
+            The tangent vector of the parametrization.
+
+        Examples
+        --------
+        We can get the tangent vector of a parametrization by using the
+        `tangent` method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> line = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([t, t]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> line.tangent()
+        Matrix([
+        [sqrt(2)/2],
+        [sqrt(2)/2]])
+        """
+        return self.velocity() / self.speed()
 
     def is_regular(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
         """
@@ -652,6 +809,8 @@ class Parametrization:
         ...
         ValueError: Substitutions must be specified.
         """
+        # TODO: We can use the `speed` method to check if the
+        # parametrization is regular.
         derivative = self.diff().subs(subs)
         free_symbols = derivative.free_symbols - {self.parameter}
         if free_symbols != set():
