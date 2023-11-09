@@ -6,7 +6,7 @@ import re
 import sympy as sp
 
 from cdgtools.constants import _AXIS_LABELS
-from cdgtools._utils import _has_sols_in
+from cdgtools._utils import _are_equal_exprs, _is_bounded, _has_sols_in
 
 
 class Parametrization:
@@ -357,11 +357,12 @@ class Parametrization:
             if self.dimension != other.dimension:
                 return False
             else:
-                difference = self.parametrization - other.parametrization.subs(
-                    other.parameter, self.parameter
+                are_equal = _are_equal_exprs(
+                    self.parametrization,
+                    other.parametrization.subs(other.parameter, self.parameter),
+                    zero=sp.zeros(self.dimension, 1),
                 )
-                if difference.expand() == sp.zeros(self.dimension, 1) and \
-                    self.domain == other.domain:
+                if are_equal and self.domain == other.domain:
                     return True
                 else:
                     return False
@@ -515,42 +516,22 @@ class Parametrization:
         """
         return self.parametrization.diff(self.parameter, order)
 
-    def reparametrize(
-        self,
-        function: sp.Expr,
-        new_parameter: sp.Symbol,
-        new_domain: sp.Interval,
-    ) -> Parametrization:
+    def is_closed(self) -> bool:
         """
-        Reparametrize the parametrization.
+        Check if the curve is closed.
 
-        Reparametrize the parametrization by using the given function and
-        domain. The function must be an invertible function from the new
-        domain to the old domain.
-
-        Parameters
-        ----------
-        function : Expr
-            The function used to reparametrize the parametrization.
-        new_domain : Interval
-            The domain of the new parametrization.
+        A curve is closed if its parametrization is defined in a closed and
+        bounded interval and the value of the parametrization at the
+        extremes of the interval is the same.
 
         Returns
         -------
-        reparametrization : Parametrization
-            The reparametrization of the parametrization.
-
-        Raises
-        ------
-        ValueError
-            If the function is not invertible or the image of the new
-            domain under the function is not a subset of the old domain.
+        closed : bool
+            Whether the curve is closed.
 
         Examples
         --------
-        We can reparametrize a parametrization by using the `reparametrize`
-        method. The function must be an invertible function from the new
-        domain to the old domain.
+        We can check if a curve is closed by using the `is_closed` method.
 
         >>> from cdgtools import Parametrization
         >>> import sympy as sp
@@ -560,37 +541,40 @@ class Parametrization:
         ...     parameter=t,
         ...     domain=sp.Interval(0, 2 * sp.pi),
         ... )
-        >>> circle.reparametrize(t / 2, t, sp.Interval(0, 4 * sp.pi))
-        Parametrization(Matrix([
-        [cos(t/2)],
-        [sin(t/2)]]), t, Interval(0, 4*pi))
+        >>> circle.is_closed()
+        True
 
-        If the function is not invertible or the image of the new domain
-        under the function is not a subset of the old domain, a
-        `ValueError` is raised.
+        If the parametrization is not defined in a closed and bounded
+        interval, the curve is not closed.
 
-        >>> circle.reparametrize(t**2, t, sp.Interval(-1, 1))
-        Traceback (most recent call last):
-        ...
-        ValueError: Function must be invertible.
-        >>> circle.reparametrize(t, t, sp.Interval(0, 4 * sp.pi))
-        Traceback (most recent call last):
-        ...
-        ValueError: Image of new domain must be a subset of the old domain.
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([t, t**2]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> other.is_closed()
+        False
+
+        If the parametrization is defined in a closed and bounded interval
+        but the value of the parametrization at the extremes of the
+        interval is not the same, the curve is not closed.
+
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, sp.pi),
+        ... )
+        >>> other.is_closed()
+        False
         """
-        # if not sp.invert_real(function, self.parameter):
-        #     raise ValueError("Function must be invertible.")
-
-        # image = function.subs(self.parameter, new_domain)
-        # if image not in self.domain:
-        #     raise ValueError("Image of new domain must be a subset of the old domain.")
-
-        # return Parametrization(
-        #     parametrization=self.parametrization.subs(self.parameter, function),
-        #     parameter=new_parameter,
-        #     domain=new_domain,
-        # )
-        return ""
+        if not (_is_bounded(self.domain) and self.domain.is_closed):
+            return False
+        else:
+            return _are_equal_exprs(
+                self(self.domain.inf),
+                self(self.domain.sup),
+                zero=sp.zeros(self.dimension, 1),
+            )
 
     def is_regular(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
         """
