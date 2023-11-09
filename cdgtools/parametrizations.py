@@ -21,11 +21,9 @@ class Parametrization:
     A parametrization is a function that maps an interval of the real numbers
     to a set of points in a space. For example, the parametrization of a
     circle of radius 1 in the plane is given by:
-
     \\[
         \\gamma(t) = (\\cos(t), \\sin(t)),
     \\]
-
     where $t \\in [0, 2\\pi]$.
 
     Parameters
@@ -527,6 +525,13 @@ class Parametrization:
 
         A segment of a parametrization is a parametrization defined in a
         closed and bounded interval of the domain of the parametrization.
+        For example, if we have a parametrization of a circle in the plane
+        defined in the interval $[0, 2\\pi]$, the parametrization
+        \\[
+            \\gamma(t) = (\\cos(t), \\sin(t)),
+        \\]
+        with $t \\in [0, \\pi]$, is a segment of the parametrization of the
+        circle.
 
         Parameters
         ----------
@@ -584,7 +589,11 @@ class Parametrization:
 
         A curve is closed if its parametrization is defined in a closed and
         bounded interval and the value of the parametrization at the
-        extremes of the interval is the same.
+        extremes of the interval is the same, i.e., if
+        \\[
+            \\gamma(a) = \\gamma(b),
+        \\]
+        with $\\gamma: [a, b] \longrightarrow \mathbb{R}^n$.
 
         Returns
         -------
@@ -643,7 +652,10 @@ class Parametrization:
         Return the velocity vector of the parametrization.
 
         The velocity of a parametrization is the derivative of the
-        parametrization with respect to the parameter.
+        parametrization with respect to the parameter, i.e.,
+        \\[
+            \\gamma'(t).
+        \\]
 
         Returns
         -------
@@ -674,7 +686,10 @@ class Parametrization:
         """
         Return the speed of the parametrization.
 
-        The speed of a parametrization is the norm of its velocity.
+        The speed of a parametrization is the norm of its velocity, i.e.,
+        \\[
+            \\|\\gamma'(t)\\|.
+        \\]
 
         Returns
         -------
@@ -706,7 +721,10 @@ class Parametrization:
         Return the tangent vector of the parametrization.
 
         The tangent vector of a parametrization is the unit vector in the
-        direction of the velocity of the parametrization.
+        direction of the velocity of the parametrization, i.e.,
+        \\[
+            \\vec{t} = \\frac{\\gamma'(t)}{\\|\\gamma'(t)\\|}.
+        \\]
 
         Returns
         -------
