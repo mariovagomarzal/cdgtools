@@ -18,9 +18,9 @@ class Parametrization:
     """
     Base class for parametrizations.
 
-    A parametrization is a function that maps an interval of the real numbers
-    to a set of points in a space. For example, the parametrization of a
-    circle of radius 1 in the plane is given by:
+    A parametrization is a continuous function that maps an interval of the
+    real numbers to a set of points in a space. For example, the
+    parametrization of a circle of radius $1$ in the plane is given by
 
     \\[
         \\gamma(t) = (\\cos(t), \\sin(t)),
@@ -765,17 +765,25 @@ class Parametrization:
         Check if the parametrization is regular.
 
         A parametrization is regular if its derivative is not the zero
-        vector in any point of its domain. For that, we calculate the
-        derivative of the parametrization and check that the equation
-        $\\gamma'(t) = 0$ has no solution in the domain of the
-        parametrization.
+        vector in any point of its domain or, equivalently, if the speed
+        of the parametrization is not zero in any point of its domain.
+
+        To check if the parametrization is regular, we solve the equation
+
+        \\[
+            \\|\\gamma'(t)\\| = 0.
+        \\]
+
+        over the domain of the parametrization. If the equation has no
+        solutions, the parametrization is regular. If the equation has
+        solutions, the parametrization is not regular.
 
         Since the expressions of the parametrization and its derivative
         may contain other symbols, we have to specify numerical values for
         those symbols. We do that by using the `subs` argument.
 
-        In some cases, we can't solve the equation $\\gamma'(t) = 0$
-        analytically. In that case, a `NotImplementedError` is raised.
+        In some cases, we can't solve the equation analytically. In that
+        case, a `NotImplementedError` is raised.
 
         Parameters
         ----------
@@ -838,12 +846,103 @@ class Parametrization:
         """
         # TODO: We can use the `speed` method to check if the
         # parametrization is regular.
-        derivative = self.diff().subs(subs)
-        free_symbols = derivative.free_symbols - {self.parameter}
+        speed = self.speed().subs(subs)
+        free_symbols = speed.free_symbols - {self.parameter}
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        return not _has_sols_in(derivative, self.parameter, self.domain)
+        return not _has_sols_in([speed], self.parameter, self.domain)
+
+    def is_natural(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
+        """
+        Check if the parametrization is natural.
+
+        A parametrization is natural if its speed is $1$ in any point of
+        its domain. To check if the parametrization is natural, we solve
+        the equation
+
+        \\[
+            \\|\\gamma'(t)\\| = 1.
+        \\]
+
+        over the domain of the parametrization. If the whole domain is
+        solution of the equation, the parametrization is natural.
+        Otherwise, it is not natural.
+
+        Since the expressions of the parametrization and its derivative
+        may contain other symbols, we have to specify numerical values for
+        those symbols. We do that by using the `subs` argument.
+
+        In some cases, we can't solve the equation analytically. In that
+        case, a `NotImplementedError` is raised.
+
+        Parameters
+        ----------
+        subs : dict[Symbol, Any] or None
+            Substitutions to make before checking if the parametrization is
+            natural.
+
+        Returns
+        -------
+        natural : bool
+            Whether the parametrization is natural.
+
+        Raises
+        ------
+        ValueError
+            If the first derivative of the parametrization contains other
+            symbols and no substitutions are specified.
+        NotImplementedError
+            If the equation :math:`\\gamma'(t) = 1` can't be solved
+            analytically.
+
+        Examples
+        --------
+        We can check if a parametrization is natural by using the
+        `is_natural` method.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.is_natural()
+        True
+
+        If our parametrization contains other symbols, we have to specify
+        numerical values for those symbols. We can check that depending on
+        the value of the parameter, the parametrization is natural or not.
+
+        >>> lamda = sp.symbols("lambda")
+        >>> other = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([lamda * t, lamda * t]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> other.is_natural({lamda: 1})
+        False
+        >>> other.is_natural({lamda: 1/sp.sqrt(2)})
+        True
+
+        If no substitutions are specified and the first derivative of the
+        parametrization contains other symbols, a `ValueError` is raised.
+
+        >>> other.is_natural()
+        Traceback (most recent call last):
+        ...
+        ValueError: Substitutions must be specified.
+        """
+        speed = self.speed().subs(subs)
+        free_symbols = speed.free_symbols - {self.parameter}
+        if free_symbols != set():
+            raise ValueError("Substitutions must be specified.")
+
+        # TODO: Change the `_has_sols_in` function so it can be used here too
+        solutions = sp.solveset(speed - 1, self.parameter, domain=self.domain)
+        return solutions == self.domain
 
 
 class Parametrization2D(Parametrization):
