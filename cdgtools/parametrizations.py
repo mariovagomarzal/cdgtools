@@ -844,8 +844,6 @@ class Parametrization:
         ...
         ValueError: Substitutions must be specified.
         """
-        # TODO: We can use the `speed` method to check if the
-        # parametrization is regular.
         speed = self.speed().subs(subs)
         free_symbols = speed.free_symbols - {self.parameter}
         if free_symbols != set():
@@ -940,7 +938,6 @@ class Parametrization:
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        # TODO: Change the `_has_sols_in` function so it can be used here too
         solutions = sp.solveset(speed - 1, self.parameter, domain=self.domain)
         return solutions == self.domain
 
