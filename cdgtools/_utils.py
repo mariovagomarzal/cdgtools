@@ -8,6 +8,12 @@ def _are_equal_exprs(expr1: sp.Expr, expr2: sp.Expr, zero: Any = 0) -> bool:
     """Return True if expr1 and expr2 are equal, False otherwise."""
     return sp.simplify(expr1 - expr2) == zero
 
+
+def _norm(vector: Any) -> sp.Expr:
+    """Return the norm of a vector."""
+    return sp.sqrt(vector.dot(vector))
+
+
 def _is_bounded(set: sp.Set) -> bool:
     """Return True if set is bounded, False otherwise."""
     return set.inf is not sp.S.NegativeInfinity and \
