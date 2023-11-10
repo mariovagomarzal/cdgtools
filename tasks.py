@@ -33,3 +33,15 @@ def lint(c, fix=False):
     c.run(ruff_command, pty=True, warn=True)
     print("Mypy linting...")
     c.run("mypy cdgtools", pty=True)
+
+
+@task
+def serve(c):
+    """Serve documentation."""
+    c.run("mkdocs serve", pty=True)
+
+
+@task
+def build(c):
+    """Build documentation."""
+    c.run("mkdocs build --clean", pty=True)
