@@ -18,7 +18,7 @@ def tests(c, verbose=0, no_doctest=False):
     if not no_doctest:
         pytest_command += " --doctest-modules"
 
-    c.run(pytest_command, pty=True)
+    c.run(pytest_command)
 
 
 @task
@@ -30,7 +30,7 @@ def lint(c, fix=False):
         ruff_command = "ruff check ."
 
     print("Ruff linting...")
-    c.run(ruff_command, pty=True, warn=True)
+    c.run(ruff_command, warn=True)
     print("Mypy linting...")
     c.run("mypy cdgtools", pty=True)
 
