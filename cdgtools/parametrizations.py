@@ -10,7 +10,8 @@ from cdgtools._utils import (
     _norm,
     _are_equal_exprs,
     _is_bounded,
-    _has_sols_in
+    _sols_in,
+    _has_sols_in,
 )
 
 
@@ -938,8 +939,7 @@ class Parametrization:
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        solutions = sp.solveset(speed - 1, self.parameter, domain=self.domain)
-        return solutions == self.domain
+        return _sols_in([speed - 1], self.parameter, self.domain) == self.domain
 
 
 class Parametrization2D(Parametrization):
