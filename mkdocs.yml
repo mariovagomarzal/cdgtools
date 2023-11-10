@@ -5,11 +5,14 @@ theme:
 
 plugins:
   - search
+  - autorefs
   - mkdocstrings:
       handlers:
         python:
           options:
             docstring_style: numpy
+            show_root_heading: true
+            members_order: source
 
 markdown_extensions:
   - pymdownx.arithmatex:
