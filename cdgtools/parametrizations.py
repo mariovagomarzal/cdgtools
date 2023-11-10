@@ -6,7 +6,7 @@ import re
 import sympy as sp
 
 from cdgtools.constants import _AXIS_LABELS
-from cdgtools._utils import _has_sols_in
+from cdgtools._utils import _has_sols_in, _is_image_in_set, _is_invertible
 
 
 class Parametrization:
@@ -566,9 +566,7 @@ class Parametrization:
         ...     domain=sp.Interval(0, 2 * sp.pi),
         ... )
         >>> circle.reparametrize(t / 2, t, sp.Interval(0, 4 * sp.pi))
-        Parametrization(Matrix([
-        [cos(t/2)],
-        [sin(t/2)]]), t, Interval(0, 4*pi))
+        Parametrization(Matrix([[cos(t/2)], [sin(t/2)]]), t, Interval(0, 4*pi))
 
         If the function is not invertible or the image of the new domain
         under the function is not a subset of the old domain, a
@@ -583,20 +581,23 @@ class Parametrization:
         ...
         ValueError: Image of new domain must be a subset of the old domain.
         """
-        # if not sp.invert_real(function, self.parameter):
-        #     raise ValueError("Function must be invertible.")
+        if not _is_invertible(function, self.parameter, new_domain):
+            raise ValueError(
+                f"Function must be invertible."
+            )
+        
+        elif not _is_image_in_set(function, self.parameter, self.domain, new_domain):
+            raise ValueError(
+                f"Image of new domain must be a subset of the old domain."
+            )
 
-        # image = function.subs(self.parameter, new_domain)
-        # if image not in self.domain:
-        #     raise ValueError("Image of new domain must be a subset of the old domain.")
-
-        # return Parametrization(
-        #     parametrization=self.parametrization.subs(self.parameter, function),
-        #     parameter=new_parameter,
-        #     domain=new_domain,
-        # )
-        return ""
-
+        else:
+            return Parametrization(
+                parametrization=self.parametrization.subs(self.parameter, function),
+                parameter=new_parameter,
+                domain=new_domain,
+            )
+         
     def is_regular(self, subs: dict[sp.Symbol, Any] = {}) -> bool:
         """
         Check if the parametrization is regular.
@@ -678,11 +679,61 @@ class Parametrization:
         if free_symbols != set():
             raise ValueError("Substitutions must be specified.")
 
-        return not all(
-            _has_sols_in(f, self.parameter, self.domain)
-            for f in derivative
-        )
+        return not _has_sols_in(derivative, self.parameter, self.domain)
 
+    def norm(self) -> sp.Expr:
+        """Computes the euclidean norm of a vector or an expression."""
+        return sp.sqrt(self.parametrization.dot(self.parametrization))
+
+    def speed(self) -> sp.Expr:
+        """Computes the norm of the velocity vector."""
+        return self.diff().norm()
+
+    def curve_length(self, interval: sp.Interval = None) -> float:
+        """
+        Computes the length of the parametrization in `interval`.
+        Note that if we reparametrize the curve, the curve length does not change.
+
+        Parameters
+        ----------
+        interval : sp.Interval
+            The interval where we compute the arc length.
+        
+        Returns
+        -------
+        lenght : float
+            The length of the curve.
+
+        Raises
+        ------
+        ValueError
+            If `interval` is not contained in the Parametrization's domain.
+
+        Examples
+        --------
+        We can get the arc length of a parametrization.
+
+        >>> from cdgtools import Parametrization
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=sp.Interval(0, 2 * sp.pi),
+        ... )
+        >>> circle.curve_length()
+        6.28318530717959
+        """
+        if interval is None:
+            interval = self.domain
+
+        elif interval.is_contained(self.domain):
+            raise ValueError(
+                f"The specified interval must be a subset of the parametrization's domain."
+            )
+        
+        a, b = interval.boundary.args
+        return sp.integrate(self.speed(), [self.parameter, a, b]).evalf()
 
 class Parametrization2D(Parametrization):
     pass
