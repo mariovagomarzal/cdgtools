@@ -589,12 +589,10 @@ class Parametrization:
             raise ValueError(
                 "Function must be invertible."
             )
-
         elif not _is_image_in_set(function, self.parameter, self.domain, new_domain):
             raise ValueError(
                 "Image of new domain must be a subset of the old domain."
             )
-
         else:
             return Parametrization(
                 parametrization=self.parametrization.subs(self.parameter, function),
@@ -1066,6 +1064,7 @@ class Parametrization:
 
         a, b = interval.boundary.args
         return sp.integrate(self.speed(), [self.parameter, a, b]).evalf()
+
 
 class Parametrization2D(Parametrization):
     pass
