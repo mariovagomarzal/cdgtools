@@ -1019,7 +1019,7 @@ class Parametrization:
 
         return _sols_in([speed - 1], self.parameter, self.domain) == self.domain
 
-    def curve_length(self, interval: sp.Interval = None) -> float:
+    def curve_length(self, interval: sp.Interval | None = None) -> sp.Expr:
         """
         Computes the length of the parametrization in `interval`.
         Note that if we reparametrize the curve, the curve length does not change.
@@ -1041,7 +1041,8 @@ class Parametrization:
 
         Examples
         --------
-        We can get the arc length of a parametrization.
+        We can get the arc length of a parametrization by using the
+        `curve_length` method.
 
         >>> from cdgtools import Parametrization
         >>> import sympy as sp
@@ -1052,18 +1053,31 @@ class Parametrization:
         ...     domain=sp.Interval(0, 2 * sp.pi),
         ... )
         >>> circle.curve_length()
-        6.28318530717959
+        2*pi
+
+        If we specify the interval, we can get the arc length of the
+        parametrization in that interval.
+
+        >>> circle.curve_length(sp.Interval(0, sp.pi))
+        pi
+
+        If the interval is not contained in the parametrization's domain,
+        a `ValueError` is raised.
+
+        >>> circle.curve_length(sp.Interval(0, 3 * sp.pi))
+        Traceback (most recent call last):
+        ...
+        ValueError: The specified interval must be a subset of the parametrization's domain.
         """
         if interval is None:
             interval = self.domain
-
-        elif interval.is_contained(self.domain):
+        elif not interval.is_subset(self.domain):
             raise ValueError(
                 "The specified interval must be a subset of the parametrization's domain."
             )
 
-        a, b = interval.boundary.args
-        return sp.integrate(self.speed(), [self.parameter, a, b]).evalf()
+        a, b = interval.inf, interval.sup
+        return sp.integrate(self.speed(), (self.parameter, a, b))
 
 
 class Parametrization2D(Parametrization):
