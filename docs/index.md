@@ -1,1 +1,1 @@
-# CDG Tools Documentation
+# cdgtools

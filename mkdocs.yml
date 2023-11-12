@@ -1,8 +1,52 @@
 site_name: CDG Tools Documentation
+site_url: https://mariovagomarzal.github.io/cdgtools/
+site_author: Mario Vago Marzal & Pedro Pasalodos Guiral
+site_description: >-
+  A Python module for studying curves, surfaces and
+  other concepts from Clasic Differential Geometry.
 
+# Repository
+repo_name: mariovagomarzal/cdgtools
+repo_url: https://github.com/mariovagomarzal/cdgtools
+
+# Copyright
+copyright: Copyright &copy; 2023 Mario Vago Marzal & Pedro Pasalodos Guiral
+
+# Configuration
 theme:
   name: material
 
+  # Color paletter
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: orange
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: orange
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - toc.follow
+    - navigation.toc
+    - navigation.footer
+    - navigation.indexes
+
+# Plugins
 plugins:
   - search
   - autorefs
@@ -14,11 +58,34 @@ plugins:
             show_root_heading: true
             members_order: source
 
+# Markdown extensions
 markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
 
+# Extras
 extra_javascript:
+  # MathJax
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# Navigation
+nav:
+  - Home:
+    - index.md
+    - Examples: examples.md
+    - Changelog: changelog.md
+    - License: license.md
+  - Usage:
+    - usage/index.md
+    - Working with parametrizations: usage/working_with_parametrizations.md
+    - 2D Parametrizations: usage/2d_parametrizations.md
+    - 3D Parametrizations: usage/3d_parametrizations.md
+  - API Reference:
+    - api/index.md
+    - Parametrizations: api/parametrizations.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Code of Conduct: development/code_of_conduct.md
+    - Development environment: development/development_environment.md
