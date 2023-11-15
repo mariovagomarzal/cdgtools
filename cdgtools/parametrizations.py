@@ -1081,8 +1081,114 @@ class Parametrization:
 
 
 class Parametrization2D(Parametrization):
-    pass
+    def __init__(
+        self,
+        parametrization: Any,
+        parameter: sp.Symbol,
+        domain: sp.Interval = sp.Reals,
+    ) -> None:
+        self.dimension, cols = parametrization.shape
+        if cols != 1:
+            raise ValueError(
+                f"Parametrization must be a column vector, not {cols} columns."
+            )
+        if self.dimension != 2:
+            raise ValueError(
+                f"Dimension of parametrization must be 2, not {self.dimension}."
+            )
+        super().__init__(parametrization, parameter, domain)
+
+    @classmethod
+    def from_parametrization(cls, parametrization: Parametrization) -> Parametrization2D:
+        return cls(
+            parametrization=parametrization.parametrization,
+            parameter=parametrization.parameter,
+            domain=parametrization.domain,
+        )
+
+    def __add__(self, other: Parametrization) -> Parametrization2D:
+        return Parametrization2D.from_parametrization(
+            super().__add__(other)
+        )
+
+    def __neg__(self) -> Parametrization2D:
+        return Parametrization2D.from_parametrization(
+            super().__neg__()
+        )
+
+    def __sub__(self, other: Parametrization) -> Parametrization2D:
+        return Parametrization2D.from_parametrization(
+            super().__sub__(other)
+        )
+
+    def reparametrize(
+        self,
+        function: sp.Expr,
+        new_parameter: sp.Symbol,
+        new_domain: sp.Interval,
+    ) -> Parametrization2D:
+        return Parametrization2D.from_parametrization(
+            super().reparametrize(function, new_parameter, new_domain)
+        )
+
+    def segment(self, new_interval: sp.Interval) -> Parametrization2D:
+        return Parametrization2D.from_parametrization(
+            super().segment(new_interval)
+        )
 
 
 class Parametrization3D(Parametrization):
-    pass
+    def __init__(
+        self,
+        parametrization: Any,
+        parameter: sp.Symbol,
+        domain: sp.Interval = sp.Reals,
+    ) -> None:
+        self.dimension, cols = parametrization.shape
+        if cols != 1:
+            raise ValueError(
+                f"Parametrization must be a column vector, not {cols} columns."
+            )
+        if self.dimension != 2:
+            raise ValueError(
+                f"Dimension of parametrization must be 2, not {self.dimension}."
+            )
+        super().__init__(parametrization, parameter, domain)
+
+    @classmethod
+    def from_parametrization(cls, parametrization: Parametrization) -> Parametrization3D:
+        return cls(
+            parametrization=parametrization.parametrization,
+            parameter=parametrization.parameter,
+            domain=parametrization.domain,
+        )
+
+    def __add__(self, other: Parametrization) -> Parametrization3D:
+        return Parametrization3D.from_parametrization(
+            super().__add__(other)
+        )
+
+    def __neg__(self) -> Parametrization3D:
+        return Parametrization3D.from_parametrization(
+            super().__neg__()
+        )
+
+    def __sub__(self, other: Parametrization) -> Parametrization3D:
+        return Parametrization3D.from_parametrization(
+            super().__sub__(other)
+        )
+
+    def reparametrize(
+        self,
+        function: sp.Expr,
+        new_parameter: sp.Symbol,
+        new_domain: sp.Interval,
+    ) -> Parametrization3D:
+        return Parametrization3D.from_parametrization(
+            super().reparametrize(function, new_parameter, new_domain)
+        )
+
+    def segment(self, new_interval: sp.Interval) -> Parametrization3D:
+        return Parametrization3D.from_parametrization(
+            super().segment(new_interval)
+        )
