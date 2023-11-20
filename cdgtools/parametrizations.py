@@ -1081,6 +1081,59 @@ class Parametrization:
 
 
 class Parametrization2D(Parametrization):
+    """
+    Class for parametrizations of curves in the plane.
+
+    This class is used to represent parametrizations of curves in the
+    plane. It is a subclass of `Parametrization` and inherits all its
+    methods and attributes.
+
+    Parameters
+    ----------
+    parametrization : Any
+        The parametrization of the curve.
+    parameter : Symbol
+        The parameter of the parametrization.
+    domain : Interval
+        The domain of the parametrization.
+
+    Attributes
+    ----------
+    dimension : int
+        The dimension of the parametrization. It is always 2.
+    parametrization : Any
+        The parametrization of the curve.
+    parameter : Symbol
+        The parameter of the parametrization.
+    domain : Interval
+        The domain of the parametrization.
+
+    Raises
+    ------
+    ValueError
+        If the parametrization is not a column vector or if the dimension
+        of the parametrization is not 2.
+
+    Examples
+    --------
+    We can create a parametrization of a circle in the plane by using the
+    `Parametrization2D` class. The parametrization must be a column vector
+    and its dimension must be 2.
+
+    >>> from cdgtools import Parametrization2D
+    >>> import sympy as sp
+    >>> t = sp.symbols("t")
+    >>> circle = Parametrization2D(
+    ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+    ...     parameter=t,
+    ...     domain=sp.Interval(0, 2 * sp.pi),
+    ... )
+    >>> circle
+    Parametrization2D(Matrix([[cos(t)], [sin(t)]]), t, Interval(0, 2*pi))
+    >>> circle.dimension
+    2
+    """
+
     def __init__(
         self,
         parametrization: Any,
@@ -1099,7 +1152,40 @@ class Parametrization2D(Parametrization):
         super().__init__(parametrization, parameter, domain)
 
     @classmethod
-    def from_parametrization(cls, parametrization: Parametrization) -> Parametrization2D:
+    def from_parametrization(
+        cls,
+        parametrization: Parametrization
+    ) -> Parametrization2D:
+        """
+        Create a `Parametrization2D` from a `Parametrization`.
+
+        Parameters
+        ----------
+        parametrization : Parametrization
+            The parametrization to create the `Parametrization2D` from.
+
+        Returns
+        -------
+        parametrization : Parametrization2D
+            The `Parametrization2D` created from `parametrization`.
+
+        Examples
+        --------
+        We can create a `Parametrization2D` from a `Parametrization` by
+        using the `from_parametrization` calss method.
+
+        >>> from cdgtools import Parametrization, Parametrization2D
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> circle = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t)]),
+        ...     parameter=t,
+        ...     domain=[0, 2 * sp.pi],
+        ... )
+        >>> circle2d = Parametrization2D.from_parametrization(circle)
+        >>> type(circle2d)
+        <class 'cdgtools.parametrizations.Parametrization2D'>
+        """
         return cls(
             parametrization=parametrization.parametrization,
             parameter=parametrization.parameter,
@@ -1156,7 +1242,10 @@ class Parametrization3D(Parametrization):
         super().__init__(parametrization, parameter, domain)
 
     @classmethod
-    def from_parametrization(cls, parametrization: Parametrization) -> Parametrization3D:
+    def from_parametrization(
+        cls,
+        parametrization: Parametrization
+    ) -> Parametrization3D:
         return cls(
             parametrization=parametrization.parametrization,
             parameter=parametrization.parameter,
