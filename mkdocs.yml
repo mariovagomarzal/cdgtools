@@ -50,6 +50,7 @@ theme:
 plugins:
   - search
   - autorefs
+  - markdown-exec
   - mkdocstrings:
       handlers:
         python:

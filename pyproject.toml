@@ -25,6 +25,7 @@ mypy = "^1.6.1"
 mkdocs-material = "^9.4.8"
 mkdocstrings = {extras = ["python"], version = "^0.23.0"}
 pytkdocs = {extras = ["numpy-style"], version = "^0.16.1"}
+markdown-exec = {extras = ["ansi"], version = "^1.7.0"}
 
 [build-system]
 requires = ["poetry-core"]
