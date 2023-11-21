@@ -83,7 +83,6 @@ nav:
   - Home:
     - index.md
     - Examples: examples.md
-    - Changelog: changelog.md
     - License: license.md
   - Usage:
     - usage/index.md
@@ -96,4 +95,5 @@ nav:
   - Development:
     - Contributing: development/contributing.md
     - Code of Conduct: development/code_of_conduct.md
+    - Changelog: development/changelog.md
     - Development environment: development/development_environment.md

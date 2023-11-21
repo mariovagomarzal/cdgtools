@@ -1,7 +1,7 @@
 # cdgtools
 
 A Python module for studying curves, surfaces and other concepts from
-Clasic Differential Geometry.
+Classical Differential Geometry.
 
 ## Contributing
 
