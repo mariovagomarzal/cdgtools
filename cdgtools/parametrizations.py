@@ -1222,8 +1222,73 @@ class Parametrization2D(Parametrization):
             super().segment(new_interval)
         )
 
+    def evolute(self) -> Parametrization2D:
+        return Parametrization2D(
+            parametrization=self.parametrization + self.normal()/self.curvature(),
+            parameter=self.parameter,
+            domain=self.domain
+        )
+
+    def normal(self) -> Any:
+        tangent_vector = self.tangent()
+        return sp.ImmutableMatrix([-tangent_vector[1], tangent_vector[0]])
+
+    def curvature(self) -> sp.Expr:
+        return sp.diff(self.tangent(), self.parameter).dot(self.normal())
 
 class Parametrization3D(Parametrization):
+    """
+    Class for parametrizations of curves in 3D space.
+
+    This class is used to represent parametrizations of curves in 3D
+    space. It is a subclass of `Parametrization` and inherits all its
+    methods and attributes.
+
+    Parameters
+    ----------
+    parametrization : Any
+        The parametrization of the curve.
+    parameter : Symbol
+        The parameter of the parametrization.
+    domain : Interval
+        The domain of the parametrization.
+
+    Attributes
+    ----------
+    dimension : int
+        The dimension of the parametrization. It is always 2.
+    parametrization : Any
+        The parametrization of the curve.
+    parameter : Symbol
+        The parameter of the parametrization.
+    domain : Interval
+        The domain of the parametrization.
+
+    Raises
+    ------
+    ValueError
+        If the parametrization is not a column vector or if the dimension
+        of the parametrization is not 3.
+
+    Examples
+    --------
+    We can create a parametrization of a helix in 3D space by using the
+    `Parametrization3D` class. The parametrization must be a column vector
+    and its dimension must be 3.
+
+    >>> from cdgtools import Parametrization3D
+    >>> import sympy as sp
+    >>> t = sp.symbols("t")
+    >>> helix = Parametrization3D(
+    ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t), t]),
+    ...     parameter=t,
+    ...     domain=sp.Reals,
+    ... )
+    >>> helix
+    Parametrization3D(Matrix([[cos(t)], [sin(t)], [t]]), t, Reals)
+    >>> helix.dimension
+    3
+    """
     def __init__(
         self,
         parametrization: Any,
@@ -1235,9 +1300,9 @@ class Parametrization3D(Parametrization):
             raise ValueError(
                 f"Parametrization must be a column vector, not {cols} columns."
             )
-        if self.dimension != 2:
+        if self.dimension != 3:
             raise ValueError(
-                f"Dimension of parametrization must be 2, not {self.dimension}."
+                f"Dimension of parametrization must be 3, not {self.dimension}."
             )
         super().__init__(parametrization, parameter, domain)
 
@@ -1251,6 +1316,36 @@ class Parametrization3D(Parametrization):
             parameter=parametrization.parameter,
             domain=parametrization.domain,
         )
+        """
+        Create a `Parametrization3D` from a `Parametrization`.
+
+        Parameters
+        ----------
+        parametrization : Parametrization
+            The parametrization to create the `Parametrization3D` from.
+
+        Returns
+        -------
+        parametrization : Parametrization3D
+            The `Parametrization3D` created from `parametrization`.
+
+        Examples
+        --------
+        We can create a `Parametrization3D` from a `Parametrization` by
+        using the `from_parametrization` calss method.
+
+        >>> from cdgtools import Parametrization, Parametrization3D
+        >>> import sympy as sp
+        >>> t = sp.symbols("t")
+        >>> helix = Parametrization(
+        ...     parametrization=sp.ImmutableMatrix([sp.cos(t), sp.sin(t),t]),
+        ...     parameter=t,
+        ...     domain=sp.Reals,
+        ... )
+        >>> helix3d = Parametrization3D.from_parametrization(helix)
+        >>> type(helix3d)
+        <class 'cdgtools.parametrizations.Parametrization3D'>
+        """
 
     def __add__(self, other: Parametrization) -> Parametrization3D:
         return Parametrization3D.from_parametrization(
@@ -1281,3 +1376,46 @@ class Parametrization3D(Parametrization):
         return Parametrization3D.from_parametrization(
             super().segment(new_interval)
         )
+
+    def normal(self) -> Any:
+        return self.binormal().cross(self.tangent())
+
+    def binormal(self) -> Any:
+        f1 = self.diff()
+        f2 = self.diff(order=2)
+        return f1.cross(f2) / _norm(f1.cross(f2))
+
+    def curvature(self) -> sp.Expr:
+        f1 = self.diff()
+        f2 = self.diff(order=2)
+        return _norm(f1.cross(f2)) / _norm(f1)**3
+
+    def torsion(self) -> sp.Expr:
+        f1 = self.diff()
+        f2 = self.diff(order=2)
+        f3 = self.diff(order=3)
+        A = sp.Matrix(
+            [[f1[0], f1[1], f1[2]],
+            [f2[0], f2[1], f2[2]],
+            [f3[0], f3[1], f3[2]]]
+        )
+
+        return sp.det(A) / _norm(f1.cross(f2))**2
+
+    def osculating_plane(self, t: Any, x: sp.Symbol, y: sp.Symbol, z: sp.Symbol) -> sp.Expr:
+        direction_vector = self.binormal().subs(self.parameter, t)
+        X = sp.ImmutableMatrix([x, y, z]) - self.parametrization.subs(self.parameter, t)
+        return direction_vector.dot(X)
+
+    def normal_plane(self, t: Any, x: sp.Symbol, y: sp.Symbol, z: sp.Symbol) -> sp.Expr:
+        direction_vector = self.tangent().subs(self.parameter, t)
+        X = sp.ImmutableMatrix([x, y, z]) - self.parametrization.subs(self.parameter, t)
+        return direction_vector.dot(X)
+
+    def rectificant_plane(self, t: Any, x: sp.Symbol, y: sp.Symbol, z: sp.Symbol) -> sp.Expr:
+        direction_vector = self.normal().subs(self.parameter, t)
+        X = sp.ImmutableMatrix([x, y, z]) - self.parametrization.subs(self.parameter, t)
+        return direction_vector.dot(X)
+
+    def is_flat(self) -> bool:
+        return _are_equal_exprs(self.torsion(), sp.Number(0))
